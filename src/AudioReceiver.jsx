@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 function AudioReceiver() {
   useEffect(() => {
-    const socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com/");
+    let socket;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -26,31 +26,46 @@ function AudioReceiver() {
       source.buffer = buffer;
       source.connect(audioCtx.destination);
 
-      source.onended = () => {
-        playNext();
-      };
-
+      source.onended = playNext;
       source.start();
     };
 
-    socket.onmessage = async (event) => {
-      const arrayBuffer = await event.data.arrayBuffer();
+    function connectSocket() {
+      console.log("Connecting to WebSocket...");
 
-      const int16Data = new Int16Array(arrayBuffer);
-      const float32Data = new Float32Array(int16Data.length);
+      socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
 
-      for (let i = 0; i < int16Data.length; i++) {
-        float32Data[i] = int16Data[i] / 32768.0;
-      }
+      socket.onopen = () => {
+        console.log("Connected to WebSocket");
+      };
 
-      // add to queue
-      queue.push(float32Data);
+      socket.onmessage = async (event) => {
+        const arrayBuffer = await event.data.arrayBuffer();
 
-      // start playback if not already
-      if (!isPlaying) {
-        playNext();
-      }
-    };
+        const int16Data = new Int16Array(arrayBuffer);
+        const float32Data = new Float32Array(int16Data.length);
+
+        for (let i = 0; i < int16Data.length; i++) {
+          float32Data[i] = int16Data[i] / 32768;
+        }
+
+        queue.push(float32Data);
+
+        if (!isPlaying) playNext();
+      };
+
+      socket.onclose = () => {
+        console.log("Disconnected. Reconnecting in 2s...");
+        setTimeout(connectSocket, 2000);
+      };
+
+      socket.onerror = (err) => {
+        console.error("WebSocket error:", err);
+        socket.close();
+      };
+    }
+
+    connectSocket();
   }, []);
 
   return null;

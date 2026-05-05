@@ -9,12 +9,11 @@ const wss = new WebSocket.Server({
 
 console.log("WebSocket running on port:", port);
 
-wss.on("connection", (ws) => {
-  console.log("Client connected");
+wss.on("connection", (ws, req) => {
+  console.log("Client connected:", req.socket.remoteAddress);
 
   ws.on("message", (data) => {
-    console.log("Audio received:", data.length);
-
+    // broadcast audio to all clients
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(data);
@@ -24,5 +23,9 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     console.log("Client disconnected");
+  });
+
+  ws.on("error", (err) => {
+    console.log("Socket error:", err.message);
   });
 });
