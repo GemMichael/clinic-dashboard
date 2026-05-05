@@ -6,15 +6,24 @@ function AudioReceiver() {
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // 🔥 FIX 1: unlock audio on first click
-    const unlockAudio = () => {
-      if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-        console.log("🔊 Audio unlocked");
-      }
-      window.removeEventListener("click", unlockAudio);
+    // 🔊 Unlock audio (REQUIRED)
+    const unlock = () => {
+      audioCtx.resume();
+      window.removeEventListener("click", unlock);
     };
-    window.addEventListener("click", unlockAudio);
+    window.addEventListener("click", unlock);
+
+    // 🔊 Gain
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 1.8;
+
+    // 🎚 Low-pass filter
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 3200;
+
+    gainNode.connect(filter);
+    filter.connect(audioCtx.destination);
 
     let queue = [];
     let isPlaying = false;
@@ -34,21 +43,20 @@ function AudioReceiver() {
 
       const source = audioCtx.createBufferSource();
       source.buffer = buffer;
-      source.connect(audioCtx.destination);
+      source.connect(gainNode);
 
       source.onended = playNext;
       source.start();
     };
 
     function connectSocket() {
-      console.log("🔄 Connecting to WebSocket...");
+      console.log(" Connecting...");
 
       socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
-
-      socket.binaryType = "arraybuffer"; // 🔥 IMPORTANT
+      socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
-        console.log("✅ Connected to WebSocket");
+        console.log(" Connected");
       };
 
       socket.onmessage = (event) => {
@@ -56,22 +64,25 @@ function AudioReceiver() {
         const float32Data = new Float32Array(int16Data.length);
 
         for (let i = 0; i < int16Data.length; i++) {
-          float32Data[i] = int16Data[i] / 32768;
+          let sample = int16Data[i] / 32768;
+
+          // 🔇 noise gate
+          if (Math.abs(sample) < 0.015) sample = 0;
+
+          float32Data[i] = sample;
         }
 
-        // 🔥 FIX 2: accumulate before playing
         queue.push(float32Data);
 
         if (!isPlaying) playNext();
       };
 
       socket.onclose = () => {
-        console.log("⚠️ Disconnected. Reconnecting...");
+        console.log(" Reconnecting...");
         setTimeout(connectSocket, 2000);
       };
 
-      socket.onerror = (err) => {
-        console.error("❌ WebSocket error:", err);
+      socket.onerror = () => {
         socket.close();
       };
     }
