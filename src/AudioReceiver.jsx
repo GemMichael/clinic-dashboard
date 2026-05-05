@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 function AudioReceiver() {
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:3000");
+    const socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com/");
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 

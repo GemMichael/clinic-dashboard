@@ -1,11 +1,13 @@
 const WebSocket = require("ws");
 
+const port = process.env.PORT || 3000;
+
 const wss = new WebSocket.Server({
-  port: 3000,
+  port,
   perMessageDeflate: false,
 });
 
-console.log("WebSocket server running on ws://0.0.0.0:3000");
+console.log("WebSocket running on port:", port);
 
 wss.on("connection", (ws) => {
   console.log("Client connected");
@@ -13,7 +15,6 @@ wss.on("connection", (ws) => {
   ws.on("message", (data) => {
     console.log("Audio received:", data.length);
 
-    // broadcast to all clients
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(data);
