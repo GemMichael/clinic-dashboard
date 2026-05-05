@@ -6,57 +6,61 @@ function AudioReceiver() {
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // 🔊 Unlock audio (REQUIRED)
+    // 🔊 Unlock audio
     const unlock = () => {
       audioCtx.resume();
       window.removeEventListener("click", unlock);
     };
     window.addEventListener("click", unlock);
 
-    // 🔊 Gain
+    // 🎚 Filters + gain
+    const highpass = audioCtx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = 100;
+
     const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 1.8;
+    gainNode.gain.value = 1.6;
 
-    // 🎚 Low-pass filter
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 3200;
+    const lowpass = audioCtx.createBiquadFilter();
+    lowpass.type = "lowpass";
+    lowpass.frequency.value = 3800;
 
-    gainNode.connect(filter);
-    filter.connect(audioCtx.destination);
+    // 🔗 chain
+    highpass.connect(gainNode);
+    gainNode.connect(lowpass);
+    lowpass.connect(audioCtx.destination);
 
-    let queue = [];
-    let isPlaying = false;
+    // 🔥 LOW LATENCY scheduling
+    let nextTime = audioCtx.currentTime;
 
-    const playNext = () => {
-      if (queue.length === 0) {
-        isPlaying = false;
-        return;
-      }
-
-      isPlaying = true;
-
-      const float32Data = queue.shift();
-
-      const buffer = audioCtx.createBuffer(1, float32Data.length, 22050);
+    const playChunk = (float32Data) => {
+      const buffer = audioCtx.createBuffer(1, float32Data.length, 16000);
       buffer.copyToChannel(float32Data, 0);
 
       const source = audioCtx.createBufferSource();
       source.buffer = buffer;
-      source.connect(gainNode);
 
-      source.onended = playNext;
-      source.start();
+      // ✅ connect chain HERE (correct place)
+      source.connect(highpass);
+
+      source.start(nextTime);
+
+      nextTime += buffer.duration;
+
+      // prevent delay buildup
+      if (nextTime < audioCtx.currentTime) {
+        nextTime = audioCtx.currentTime;
+      }
     };
 
     function connectSocket() {
-      console.log(" Connecting...");
+      console.log("🔄 Connecting...");
 
       socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
-        console.log(" Connected");
+        console.log("✅ Connected");
       };
 
       socket.onmessage = (event) => {
@@ -72,13 +76,12 @@ function AudioReceiver() {
           float32Data[i] = sample;
         }
 
-        queue.push(float32Data);
-
-        if (!isPlaying) playNext();
+        // 🔥 LOW LATENCY (no queue)
+        playChunk(float32Data);
       };
 
       socket.onclose = () => {
-        console.log(" Reconnecting...");
+        console.log("⚠️ Reconnecting...");
         setTimeout(connectSocket, 2000);
       };
 
