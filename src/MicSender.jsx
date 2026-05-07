@@ -4,14 +4,15 @@ function MicSender({ talking }) {
 
   const socketRef = useRef(null);
 
-  // 🔥 REALTIME TALKING STATE
   const talkingRef = useRef(false);
 
-  // 🔥 UPDATE REF
   talkingRef.current = talking;
 
   useEffect(() => {
 
+    // =========================
+    // WEBSOCKET
+    // =========================
     socketRef.current = new WebSocket(
       "wss://clinic-dashboard-1-xlgb.onrender.com"
     );
@@ -22,20 +23,38 @@ function MicSender({ talking }) {
 
       console.log("Mic Connected");
 
+      // =========================
+      // GET MICROPHONE
+      // =========================
       const stream =
         await navigator.mediaDevices.getUserMedia({
-          audio: true
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
         });
 
-      const audioCtx =
-        new AudioContext();
+      // =========================
+      // AUDIO CONTEXT
+      // =========================
+      const audioCtx = new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )({
+        sampleRate: 16000
+      });
 
+      // =========================
+      // SOURCE
+      // =========================
       const source =
         audioCtx.createMediaStreamSource(stream);
 
+      // 🔥 SMALLER BUFFER
       const processor =
         audioCtx.createScriptProcessor(
-          1024,
+          256,
           1,
           1
         );
@@ -44,9 +63,11 @@ function MicSender({ talking }) {
 
       processor.connect(audioCtx.destination);
 
+      // =========================
+      // AUDIO PROCESS
+      // =========================
       processor.onaudioprocess = (e) => {
 
-        // 🔥 USE REF INSTEAD
         if (!talkingRef.current) return;
 
         const input =
@@ -55,9 +76,16 @@ function MicSender({ talking }) {
         const int16 =
           new Int16Array(input.length);
 
+        // 🔥 VOLUME BOOST
         for (let i = 0; i < input.length; i++) {
 
-          int16[i] = input[i] * 32767;
+          let sample = input[i];
+
+          // LIMIT
+          sample = Math.max(-1, Math.min(1, sample));
+
+          // CONVERT FLOAT → PCM16
+          int16[i] = sample * 12000;
         }
 
         if (
@@ -65,12 +93,26 @@ function MicSender({ talking }) {
           socketRef.current.readyState === WebSocket.OPEN
         ) {
 
-          // 🔥 DEBUG
-          console.log("Sending audio");
+          console.log(
+            "Sending audio:",
+            int16.length
+          );
 
-          socketRef.current.send(int16.buffer);
+          socketRef.current.send(
+            int16.buffer
+          );
         }
       };
+    };
+
+    socketRef.current.onerror = (err) => {
+
+      console.log("Mic Socket Error", err);
+    };
+
+    socketRef.current.onclose = () => {
+
+      console.log("Mic Socket Closed");
     };
 
     return () => {
