@@ -81,8 +81,9 @@ function App() {
 
       <button
         className="ptt-btn"
-        onMouseDown={() => setTalking(true)}
-        onMouseUp={() => setTalking(false)}
+        onPointerDown={() => setTalking(true)}
+        onPointerUp={() => setTalking(false)}
+        onPointerLeave={() => setTalking(false)}
         onTouchStart={() => setTalking(true)}
         onTouchEnd={() => setTalking(false)}
       >

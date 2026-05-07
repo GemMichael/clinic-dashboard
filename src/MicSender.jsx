@@ -58,7 +58,7 @@ function MicSender({ talking }) {
       };
     };
 
-  }, [talking]);
+  }, []);
 
   return null;
 }
