@@ -48,7 +48,13 @@ function MicSender({ talking }) {
           int16[i] = input[i] * 32767;
         }
 
-        socketRef.current.send(int16.buffer);
+        if (
+          socketRef.current &&
+          socketRef.current.readyState === WebSocket.OPEN
+        ) {
+
+          socketRef.current.send(int16.buffer);
+        }
       };
     };
 
