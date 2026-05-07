@@ -3,7 +3,12 @@ import { useEffect, useRef } from "react";
 function MicSender({ talking }) {
 
   const socketRef = useRef(null);
-  const processorRef = useRef(null);
+
+  // 🔥 REALTIME TALKING STATE
+  const talkingRef = useRef(false);
+
+  // 🔥 UPDATE REF
+  talkingRef.current = talking;
 
   useEffect(() => {
 
@@ -11,23 +16,29 @@ function MicSender({ talking }) {
       "wss://clinic-dashboard-1-xlgb.onrender.com"
     );
 
+    socketRef.current.binaryType = "arraybuffer";
+
     socketRef.current.onopen = async () => {
 
       console.log("Mic Connected");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true
-      });
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio: true
+        });
 
-      const audioCtx = new AudioContext();
+      const audioCtx =
+        new AudioContext();
 
       const source =
         audioCtx.createMediaStreamSource(stream);
 
       const processor =
-        audioCtx.createScriptProcessor(1024, 1, 1);
-
-      processorRef.current = processor;
+        audioCtx.createScriptProcessor(
+          1024,
+          1,
+          1
+        );
 
       source.connect(processor);
 
@@ -35,7 +46,8 @@ function MicSender({ talking }) {
 
       processor.onaudioprocess = (e) => {
 
-        if (!talking) return;
+        // 🔥 USE REF INSTEAD
+        if (!talkingRef.current) return;
 
         const input =
           e.inputBuffer.getChannelData(0);
@@ -53,9 +65,20 @@ function MicSender({ talking }) {
           socketRef.current.readyState === WebSocket.OPEN
         ) {
 
+          // 🔥 DEBUG
+          console.log("Sending audio");
+
           socketRef.current.send(int16.buffer);
         }
       };
+    };
+
+    return () => {
+
+      if (socketRef.current) {
+
+        socketRef.current.close();
+      }
     };
 
   }, []);
