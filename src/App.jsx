@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { db } from "./firebase";
 import { ref, onValue, set } from "firebase/database";
 import AudioReceiver from "./AudioReceiver";
+import MicSender from "./MicSender";
 
 function App() {
   const [alert, setAlert] = useState(false);
   const alarmRef = useRef(null);
   const audioCtxRef = useRef(null);
+  const [talking, setTalking] = useState(false);
 
   // 🔥 AUTO ENABLE AUDIO (best possible)
   useEffect(() => {
@@ -75,6 +77,18 @@ function App() {
 
       <AudioReceiver />
 
+      <MicSender talking={talking} />
+
+      <button
+        className="ptt-btn"
+        onMouseDown={() => setTalking(true)}
+        onMouseUp={() => setTalking(false)}
+        onTouchStart={() => setTalking(true)}
+        onTouchEnd={() => setTalking(false)}
+      >
+        🎤 HOLD TO TALK
+      </button>
+
       {/* 🎨 STYLES */}
       <style>{`
         body {
@@ -90,6 +104,18 @@ function App() {
           height: 100vh;
           transition: 0.3s;
         }
+
+      .ptt-btn {
+  margin-top: 20px;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 12px;
+  background: #dc2626;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
         /* 🚨 FLASHING ALERT */
 .alert-mode {
