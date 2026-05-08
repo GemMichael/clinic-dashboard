@@ -25,6 +25,9 @@ function App() {
   const [panicLogs, setPanicLogs] =
     useState([]);
 
+  const [users, setUsers] =
+    useState({});
+
   const alarmRef = useRef(null);
 
   const audioCtxRef = useRef(null);
@@ -43,8 +46,6 @@ function App() {
     const unlockAudio = () => {
 
       audioCtxRef.current.resume();
-
-      console.log("Audio unlocked");
 
       window.removeEventListener(
         "click",
@@ -65,7 +66,8 @@ function App() {
   useEffect(() => {
 
     // 🚨 PANIC
-    const panicRef = ref(db, "panic");
+    const panicRef =
+      ref(db, "panic");
 
     onValue(panicRef, (snapshot) => {
 
@@ -79,12 +81,7 @@ function App() {
 
           alarmRef.current.loop = true;
 
-          alarmRef.current.play().catch(() => {
-
-            console.log(
-              "Autoplay blocked"
-            );
-          });
+          alarmRef.current.play().catch(() => {});
         }
 
       } else {
@@ -149,6 +146,20 @@ function App() {
       }
     });
 
+    // 👤 USERS
+    const usersRef =
+      ref(db, "users");
+
+    onValue(usersRef, (snapshot) => {
+
+      const data = snapshot.val();
+
+      if (data) {
+
+        setUsers(data);
+      }
+    });
+
   }, []);
 
   // =========================
@@ -158,7 +169,9 @@ function App() {
 
     if (!fingerID || !userName) {
 
-      alert("Missing Fingerprint ID or Name");
+      alert(
+        "Missing Fingerprint ID or Name"
+      );
 
       return;
     }
@@ -239,7 +252,7 @@ function App() {
         )}
 
         {/* ========================= */}
-        {/* FINGERPRINT STATUS */}
+        {/* FINGERPRINT */}
         {/* ========================= */}
         <div className="finger-box">
 
@@ -260,7 +273,7 @@ function App() {
             </p>
           )}
 
-          {/* REGISTER USER */}
+          {/* REGISTER */}
           <div className="register-box">
 
             <input
@@ -287,50 +300,58 @@ function App() {
         </div>
 
         {/* ========================= */}
-        {/* PANIC HISTORY */}
+        {/* HISTORY */}
         {/* ========================= */}
-        <div className="history-box">
+        <div className="history-card">
 
-          <h3>
+          <h3 className="history-title">
             🚨 Panic History
           </h3>
 
-          {panicLogs.length === 0 ? (
+          <div className="history-scroll">
 
-            <p className="no-history">
-              No panic history
-            </p>
+            {panicLogs.length === 0 ? (
 
-          ) : (
+              <p className="no-history">
+                No panic history
+              </p>
 
-            panicLogs.map((log) => (
+            ) : (
 
-              <div
-                key={log.id}
-                className="history-item"
-              >
+              panicLogs.map((log) => (
 
-                <p>
-                  <strong>ID:</strong>
-                  {" "}
-                  {log.fingerprintID}
-                </p>
+                <div
+                  key={log.id}
+                  className="history-item"
+                >
 
-                <p>
-                  <strong>Name:</strong>
-                  {" "}
-                  {log.name || "Unknown"}
-                </p>
+                  <p>
+                    <strong>ID:</strong>
+                    {" "}
+                    {log.fingerprintID}
+                  </p>
 
-                <p>
-                  <strong>Time:</strong>
-                  {" "}
-                  {log.time}
-                </p>
+                  <p>
+                    <strong>Name:</strong>
+                    {" "}
+                    {
+                      users[
+                        log.fingerprintID
+                      ]?.name || "Unknown"
+                    }
+                  </p>
 
-              </div>
-            ))
-          )}
+                  <p>
+                    <strong>Time:</strong>
+                    {" "}
+                    {log.time}
+                  </p>
+
+                </div>
+              ))
+            )}
+
+          </div>
 
         </div>
 
@@ -362,6 +383,7 @@ function App() {
       <style>{`
 
         body {
+
           margin: 0;
           font-family: Arial, sans-serif;
           background: #f1f5f9;
@@ -373,11 +395,10 @@ function App() {
           justify-content: center;
           align-items: center;
           min-height: 100vh;
-          transition: 0.3s;
           padding: 20px;
         }
 
-        /* 🚨 FLASHING */
+        /* 🚨 FLASH */
         .alert-mode {
 
           animation:
@@ -404,22 +425,21 @@ function App() {
         /* ========================= */
         .main-card {
 
+          width: 450px;
           background: white;
-          padding: 35px;
           border-radius: 24px;
-          text-align: center;
-          color: #0f172a;
+          padding: 30px;
           box-shadow:
             0 10px 30px rgba(0,0,0,0.12);
-          width: 450px;
-          border: 2px solid #3b82f6;
+          border: 2px solid #2563eb;
         }
 
         .title {
 
-          font-size: 32px;
-          margin-bottom: 25px;
+          text-align: center;
+          font-size: 34px;
           color: #2563eb;
+          margin-bottom: 25px;
         }
 
         /* ========================= */
@@ -432,11 +452,13 @@ function App() {
           padding: 20px;
           border-radius: 16px;
           margin-bottom: 20px;
+          text-align: center;
         }
 
         .btn-ok {
 
-          padding: 12px 25px;
+          margin-top: 15px;
+          padding: 12px 24px;
           border: none;
           border-radius: 10px;
           background: white;
@@ -446,36 +468,36 @@ function App() {
         }
 
         /* ========================= */
-        /* FINGERPRINT BOX */
+        /* FINGER BOX */
         /* ========================= */
         .finger-box {
 
-          margin-top: 20px;
-          padding: 20px;
-          border-radius: 16px;
           background: #f8fafc;
           border: 1px solid #cbd5e1;
+          border-radius: 16px;
+          padding: 20px;
         }
 
         .finger-box h3 {
 
-          margin-bottom: 12px;
+          text-align: center;
           color: #2563eb;
+          margin-bottom: 15px;
         }
 
         .finger-status {
 
-          font-size: 18px;
-          font-weight: bold;
+          text-align: center;
           color: #16a34a;
-          margin-bottom: 10px;
+          font-size: 20px;
+          font-weight: bold;
         }
 
         .finger-id {
 
-          font-size: 15px;
-          color: #334155;
-          margin-bottom: 20px;
+          text-align: center;
+          margin-top: 10px;
+          color: #475569;
         }
 
         /* ========================= */
@@ -483,31 +505,31 @@ function App() {
         /* ========================= */
         .register-box {
 
-          margin-top: 15px;
+          margin-top: 20px;
         }
 
         .name-input {
 
           width: 100%;
-          padding: 12px;
-          border-radius: 10px;
+          padding: 14px;
+          border-radius: 12px;
           border: 1px solid #cbd5e1;
-          margin-bottom: 10px;
-          font-size: 15px;
+          margin-bottom: 12px;
           box-sizing: border-box;
+          font-size: 15px;
         }
 
         .save-user-btn {
 
           width: 100%;
-          padding: 12px;
+          padding: 14px;
           border: none;
-          border-radius: 10px;
+          border-radius: 12px;
           background: #2563eb;
           color: white;
+          font-size: 16px;
           font-weight: bold;
           cursor: pointer;
-          transition: 0.2s;
         }
 
         .save-user-btn:hover {
@@ -518,16 +540,27 @@ function App() {
         /* ========================= */
         /* HISTORY */
         /* ========================= */
-        .history-box {
+        .history-card {
 
           margin-top: 25px;
-          text-align: left;
+          background: #ffffff;
+          border: 1px solid #cbd5e1;
+          border-radius: 16px;
+          padding: 20px;
         }
 
-        .history-box h3 {
+        .history-title {
 
           color: #dc2626;
           margin-bottom: 15px;
+          text-align: center;
+        }
+
+        .history-scroll {
+
+          max-height: 320px;
+          overflow-y: auto;
+          padding-right: 5px;
         }
 
         .history-item {
@@ -535,8 +568,8 @@ function App() {
           background: #f8fafc;
           border: 1px solid #cbd5e1;
           border-radius: 12px;
-          padding: 12px;
-          margin-top: 12px;
+          padding: 14px;
+          margin-bottom: 12px;
         }
 
         .history-item p {
@@ -546,16 +579,17 @@ function App() {
 
         .no-history {
 
+          text-align: center;
           color: #64748b;
         }
 
         /* ========================= */
-        /* PUSH TO TALK */
+        /* PTT */
         /* ========================= */
         .ptt-btn {
 
-          margin-top: 25px;
           width: 100%;
+          margin-top: 25px;
           padding: 16px;
           border: none;
           border-radius: 14px;
@@ -564,12 +598,6 @@ function App() {
           font-size: 17px;
           font-weight: bold;
           cursor: pointer;
-          transition: 0.2s;
-        }
-
-        .ptt-btn:hover {
-
-          background: #b91c1c;
         }
 
         .ptt-btn.talking {
@@ -587,7 +615,7 @@ function App() {
           }
 
           50% {
-            transform: scale(1.03);
+            transform: scale(1.02);
           }
 
           100% {
