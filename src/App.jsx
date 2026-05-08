@@ -19,6 +19,12 @@ function App() {
   const [fingerID, setFingerID] =
     useState(null);
 
+  const [userName, setUserName] =
+    useState("");
+
+  const [panicLogs, setPanicLogs] =
+    useState([]);
+
   const alarmRef = useRef(null);
 
   const audioCtxRef = useRef(null);
@@ -115,7 +121,59 @@ function App() {
       }
     });
 
+    // 🚨 PANIC LOGS
+    const logsRef =
+      ref(db, "panicLogs");
+
+    onValue(logsRef, (snapshot) => {
+
+      const data = snapshot.val();
+
+      if (data) {
+
+        const logs =
+          Object.entries(data).map(
+            ([id, value]) => ({
+              id,
+              ...value
+            })
+          );
+
+        logs.reverse();
+
+        setPanicLogs(logs);
+
+      } else {
+
+        setPanicLogs([]);
+      }
+    });
+
   }, []);
+
+  // =========================
+  // SAVE USER
+  // =========================
+  const saveUser = async () => {
+
+    if (!fingerID || !userName) {
+
+      alert("Missing Fingerprint ID or Name");
+
+      return;
+    }
+
+    await set(
+      ref(db, `users/${fingerID}`),
+      {
+        name: userName
+      }
+    );
+
+    alert("User Saved!");
+
+    setUserName("");
+  };
 
   // =========================
   // OK BUTTON
@@ -180,11 +238,13 @@ function App() {
           </div>
         )}
 
-        {/* 👆 FINGERPRINT STATUS */}
+        {/* ========================= */}
+        {/* FINGERPRINT STATUS */}
+        {/* ========================= */}
         <div className="finger-box">
 
           <h3>
-             Fingerprint Status
+            👆 Fingerprint Status
           </h3>
 
           <p className="finger-status">
@@ -200,9 +260,83 @@ function App() {
             </p>
           )}
 
+          {/* REGISTER USER */}
+          <div className="register-box">
+
+            <input
+              type="text"
+              placeholder="Enter User Name"
+              value={userName}
+              onChange={(e) =>
+                setUserName(
+                  e.target.value
+                )
+              }
+              className="name-input"
+            />
+
+            <button
+              className="save-user-btn"
+              onClick={saveUser}
+            >
+              Save User
+            </button>
+
+          </div>
+
         </div>
 
-        {/* 🎤 PUSH TO TALK */}
+        {/* ========================= */}
+        {/* PANIC HISTORY */}
+        {/* ========================= */}
+        <div className="history-box">
+
+          <h3>
+            🚨 Panic History
+          </h3>
+
+          {panicLogs.length === 0 ? (
+
+            <p className="no-history">
+              No panic history
+            </p>
+
+          ) : (
+
+            panicLogs.map((log) => (
+
+              <div
+                key={log.id}
+                className="history-item"
+              >
+
+                <p>
+                  <strong>ID:</strong>
+                  {" "}
+                  {log.fingerprintID}
+                </p>
+
+                <p>
+                  <strong>Name:</strong>
+                  {" "}
+                  {log.name || "Unknown"}
+                </p>
+
+                <p>
+                  <strong>Time:</strong>
+                  {" "}
+                  {log.time}
+                </p>
+
+              </div>
+            ))
+          )}
+
+        </div>
+
+        {/* ========================= */}
+        {/* PUSH TO TALK */}
+        {/* ========================= */}
         <button
           className={`ptt-btn ${
             talking ? "talking" : ""
@@ -238,7 +372,7 @@ function App() {
           display: flex;
           justify-content: center;
           align-items: center;
-          height: 100vh;
+          min-height: 100vh;
           transition: 0.3s;
           padding: 20px;
         }
@@ -277,15 +411,38 @@ function App() {
           color: #0f172a;
           box-shadow:
             0 10px 30px rgba(0,0,0,0.12);
-          width: 420px;
+          width: 450px;
           border: 2px solid #3b82f6;
         }
 
         .title {
 
-          font-size: 30px;
+          font-size: 32px;
           margin-bottom: 25px;
           color: #2563eb;
+        }
+
+        /* ========================= */
+        /* ALERT */
+        /* ========================= */
+        .alert-box {
+
+          background: #dc2626;
+          color: white;
+          padding: 20px;
+          border-radius: 16px;
+          margin-bottom: 20px;
+        }
+
+        .btn-ok {
+
+          padding: 12px 25px;
+          border: none;
+          border-radius: 10px;
+          background: white;
+          color: #dc2626;
+          font-weight: bold;
+          cursor: pointer;
         }
 
         /* ========================= */
@@ -302,7 +459,7 @@ function App() {
 
         .finger-box h3 {
 
-          margin: 0 0 12px 0;
+          margin-bottom: 12px;
           color: #2563eb;
         }
 
@@ -318,25 +475,32 @@ function App() {
 
           font-size: 15px;
           color: #334155;
-        }
-
-        /* ========================= */
-        /* ALERT */
-        /* ========================= */
-        .alert-box {
-
           margin-bottom: 20px;
         }
 
-        .alert-box h2 {
+        /* ========================= */
+        /* REGISTER */
+        /* ========================= */
+        .register-box {
 
-          color: #dc2626;
-          margin-bottom: 15px;
+          margin-top: 15px;
         }
 
-        .btn-ok {
+        .name-input {
 
-          padding: 12px 25px;
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid #cbd5e1;
+          margin-bottom: 10px;
+          font-size: 15px;
+          box-sizing: border-box;
+        }
+
+        .save-user-btn {
+
+          width: 100%;
+          padding: 12px;
           border: none;
           border-radius: 10px;
           background: #2563eb;
@@ -346,9 +510,43 @@ function App() {
           transition: 0.2s;
         }
 
-        .btn-ok:hover {
+        .save-user-btn:hover {
 
           background: #1d4ed8;
+        }
+
+        /* ========================= */
+        /* HISTORY */
+        /* ========================= */
+        .history-box {
+
+          margin-top: 25px;
+          text-align: left;
+        }
+
+        .history-box h3 {
+
+          color: #dc2626;
+          margin-bottom: 15px;
+        }
+
+        .history-item {
+
+          background: #f8fafc;
+          border: 1px solid #cbd5e1;
+          border-radius: 12px;
+          padding: 12px;
+          margin-top: 12px;
+        }
+
+        .history-item p {
+
+          margin: 6px 0;
+        }
+
+        .no-history {
+
+          color: #64748b;
         }
 
         /* ========================= */
