@@ -5,8 +5,10 @@ import AudioReceiver from "./AudioReceiver";
 import MicSender from "./MicSender";
 
 function App() {
-  // STATES
 
+  // =========================
+  // STATES
+  // =========================
   const [alert, setAlert] = useState(false);
 
   const [talking, setTalking] = useState(false);
@@ -30,10 +32,9 @@ function App() {
 
   const audioCtxRef = useRef(null);
 
-  const [showUsers, setShowUsers] = useState(false);
-
+  // =========================
   // AUDIO UNLOCK
-
+  // =========================
   useEffect(() => {
 
     audioCtxRef.current =
@@ -59,11 +60,12 @@ function App() {
 
   }, []);
 
+  // =========================
   // FIREBASE LISTENERS
-
+  // =========================
   useEffect(() => {
 
-    //  PANIC
+    // 🚨 PANIC
     const panicRef =
       ref(db, "panic");
 
@@ -79,7 +81,7 @@ function App() {
 
           alarmRef.current.loop = true;
 
-          alarmRef.current.play().catch(() => { });
+          alarmRef.current.play().catch(() => {});
         }
 
       } else {
@@ -88,7 +90,7 @@ function App() {
       }
     });
 
-    //  FINGERPRINT STATUS
+    // 👆 FINGERPRINT STATUS
     const fingerRef =
       ref(db, "fingerprint/status");
 
@@ -102,7 +104,7 @@ function App() {
       }
     });
 
-    //  LAST ID
+    // 👆 LAST ID
     const fingerIDRef =
       ref(db, "fingerprint/lastID");
 
@@ -116,7 +118,7 @@ function App() {
       }
     });
 
-    // PANIC LOGS
+    // 🚨 PANIC LOGS
     const logsRef =
       ref(db, "panicLogs");
 
@@ -144,7 +146,7 @@ function App() {
       }
     });
 
-    //  USERS
+    // 👤 USERS
     const usersRef =
       ref(db, "users");
 
@@ -160,9 +162,9 @@ function App() {
 
   }, []);
 
-
+  // =========================
   // SAVE USER
-
+  // =========================
   const saveUser = async () => {
 
     if (!fingerID || !userName) {
@@ -186,9 +188,9 @@ function App() {
     setUserName("");
   };
 
-
+  // =========================
   // OK BUTTON
-
+  // =========================
   const handleOK = () => {
 
     set(ref(db, "panic"), false);
@@ -204,32 +206,33 @@ function App() {
   return (
 
     <div
-      className={`app-container ${alert ? "alert-mode" : ""
-        }`}
+      className={`app-container ${
+        alert ? "alert-mode" : ""
+      }`}
     >
 
-      {/*  ALARM */}
+      {/* 🔊 ALARM */}
       <audio
         ref={alarmRef}
         src="/alarm.mp3"
         preload="auto"
       />
 
-      {/*  AUDIO */}
+      {/* 🎤 AUDIO */}
       <AudioReceiver />
 
       <MicSender talking={talking} />
 
-
+      {/* ========================= */}
       {/* MAIN CARD */}
-
+      {/* ========================= */}
       <div className="main-card">
 
         <h1 className="title">
           🚑 CERMedi-ALERT
         </h1>
 
-        {/*  ALERT */}
+        {/* 🚨 ALERT */}
         {alert && (
 
           <div className="alert-box">
@@ -248,9 +251,9 @@ function App() {
           </div>
         )}
 
-
+        {/* ========================= */}
         {/* FINGERPRINT */}
-
+        {/* ========================= */}
         <div className="finger-box">
 
           <h3>
@@ -296,8 +299,9 @@ function App() {
 
         </div>
 
+        {/* ========================= */}
         {/* HISTORY */}
-
+        {/* ========================= */}
         <div className="history-card">
 
           <h3 className="history-title">
@@ -351,12 +355,13 @@ function App() {
 
         </div>
 
-
+        {/* ========================= */}
         {/* PUSH TO TALK */}
-
+        {/* ========================= */}
         <button
-          className={`ptt-btn ${talking ? "talking" : ""
-            }`}
+          className={`ptt-btn ${
+            talking ? "talking" : ""
+          }`}
           onPointerDown={() => setTalking(true)}
           onPointerUp={() => setTalking(false)}
           onPointerLeave={() => setTalking(false)}
@@ -370,60 +375,11 @@ function App() {
 
         </button>
 
-
-        <button
-          className="users-btn"
-          onClick={() => setShowUsers(true)}
-        >
-          👥 VIEW USERS
-        </button>
-
-        {showUsers && (
-
-          <div className="modal-overlay">
-
-            <div className="modal-card">
-
-              <h2> Registered Users</h2>
-
-              <div className="users-list">
-
-                {Object.keys(users).length === 0 ? (
-
-                  <p>No users found</p>
-
-                ) : (
-
-                  Object.entries(users).map(([id, user]) => (
-
-                    <div key={id} className="user-item">
-
-                      <p><strong>ID:</strong> {id}</p>
-
-                      <p><strong>Name:</strong> {user.name}</p>
-
-                    </div>
-                  ))
-                )}
-
-              </div>
-
-              <button
-                className="close-btn"
-                onClick={() => setShowUsers(false)}
-              >
-                CLOSE
-              </button>
-
-            </div>
-
-          </div>
-        )}
-
       </div>
 
+      {/* ========================= */}
       {/* STYLES */}
-
+      {/* ========================= */}
       <style>{`
 
         body {
@@ -464,8 +420,9 @@ function App() {
           }
         }
 
+        /* ========================= */
         /* CARD */
-
+        /* ========================= */
         .main-card {
 
           width: 450px;
@@ -485,9 +442,9 @@ function App() {
           margin-bottom: 25px;
         }
 
-
+        /* ========================= */
         /* ALERT */
-
+        /* ========================= */
         .alert-box {
 
           background: #dc2626;
@@ -510,9 +467,9 @@ function App() {
           cursor: pointer;
         }
 
-
+        /* ========================= */
         /* FINGER BOX */
-
+        /* ========================= */
         .finger-box {
 
           background: #f8fafc;
@@ -543,9 +500,9 @@ function App() {
           color: #475569;
         }
 
-
+        /* ========================= */
         /* REGISTER */
-
+        /* ========================= */
         .register-box {
 
           margin-top: 20px;
@@ -580,9 +537,9 @@ function App() {
           background: #1d4ed8;
         }
 
-
+        /* ========================= */
         /* HISTORY */
-
+        /* ========================= */
         .history-card {
 
           margin-top: 25px;
@@ -626,78 +583,9 @@ function App() {
           color: #64748b;
         }
 
-        .users-btn {
-  margin-top: 15px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  background: #2563eb;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 999;
-}
-
-.modal-card {
-  background: white;
-  width: 400px;
-  max-height: 500px;
-
-  border-radius: 20px;
-  padding: 20px;
-
-  overflow: hidden;
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.users-list {
-  max-height: 300px;
-  overflow-y: auto;
-
-  margin-top: 20px;
-}
-
-.user-item {
-  background: #f8fafc;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-
-.close-btn {
-  width: 100%;
-  margin-top: 20px;
-
-  padding: 12px;
-
-  border: none;
-  border-radius: 12px;
-
-  background: #dc2626;
-  color: white;
-
-  font-weight: bold;
-  cursor: pointer;
-}
-
-
+        /* ========================= */
         /* PTT */
-
+        /* ========================= */
         .ptt-btn {
 
           width: 100%;
