@@ -18,10 +18,10 @@ wss.on("connection", (ws, req) => {
 
   ws.on("message", (data) => {
 
-    // 🔥 DEBUG
+    //  DEBUG
     console.log("Audio packet:", data.length);
 
-    // 🔥 SEND ONLY TO OTHER CLIENTS
+    //  SEND ONLY TO OTHER CLIENTS
     wss.clients.forEach((client) => {
 
       if (

@@ -6,14 +6,14 @@ function AudioReceiver() {
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // 🔊 Unlock audio
+    //  Unlock audio
     const unlock = () => {
       audioCtx.resume();
       window.removeEventListener("click", unlock);
     };
     window.addEventListener("click", unlock);
 
-    // 🎚 Filters + gain
+    //  Filters + gain
     const highpass = audioCtx.createBiquadFilter();
     highpass.type = "highpass";
     highpass.frequency.value = 100;
@@ -25,12 +25,12 @@ function AudioReceiver() {
     lowpass.type = "lowpass";
     lowpass.frequency.value = 3800;
 
-    // 🔗 chain
+    //  chain
     highpass.connect(gainNode);
     gainNode.connect(lowpass);
     lowpass.connect(audioCtx.destination);
 
-    // 🔥 LOW LATENCY scheduling
+    //  LOW LATENCY scheduling
     let nextTime = audioCtx.currentTime;
 
     const playChunk = (float32Data) => {
@@ -40,7 +40,7 @@ function AudioReceiver() {
       const source = audioCtx.createBufferSource();
       source.buffer = buffer;
 
-      // ✅ connect chain HERE (correct place)
+      //  connect chain 
       source.connect(highpass);
 
       source.start(nextTime);
@@ -54,13 +54,13 @@ function AudioReceiver() {
     };
 
     function connectSocket() {
-      console.log("🔄 Connecting...");
+      console.log(" Connecting...");
 
       socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
-        console.log("✅ Connected");
+        console.log(" Connected");
       };
 
       socket.onmessage = (event) => {
@@ -70,13 +70,13 @@ function AudioReceiver() {
         for (let i = 0; i < int16Data.length; i++) {
           let sample = int16Data[i] / 32768;
 
-          // 🔇 noise gate
+          //  noise gate
           if (Math.abs(sample) < 0.015) sample = 0;
 
           float32Data[i] = sample;
         }
 
-        // 🔥 LOW LATENCY (no queue)
+        //  LOW LATENCY (no queue)
         playChunk(float32Data);
       };
 

@@ -10,9 +10,8 @@ function MicSender({ talking }) {
 
   useEffect(() => {
 
-    // =========================
     // WEBSOCKET
-    // =========================
+
     socketRef.current = new WebSocket(
       "wss://clinic-dashboard-1-xlgb.onrender.com"
     );
@@ -23,9 +22,9 @@ function MicSender({ talking }) {
 
       console.log("Mic Connected");
 
-      // =========================
+
       // GET MICROPHONE
-      // =========================
+
       const stream =
         await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -35,9 +34,9 @@ function MicSender({ talking }) {
           }
         });
 
-      // =========================
+
       // AUDIO CONTEXT
-      // =========================
+
       const audioCtx = new (
         window.AudioContext ||
         window.webkitAudioContext
@@ -45,13 +44,12 @@ function MicSender({ talking }) {
         sampleRate: 16000
       });
 
-      // =========================
+
       // SOURCE
-      // =========================
       const source =
         audioCtx.createMediaStreamSource(stream);
 
-      // 🔥 SMALLER BUFFER
+
       const processor =
         audioCtx.createScriptProcessor(
           256,
@@ -63,9 +61,9 @@ function MicSender({ talking }) {
 
       processor.connect(audioCtx.destination);
 
-      // =========================
+
       // AUDIO PROCESS
-      // =========================
+
       processor.onaudioprocess = (e) => {
 
         if (!talkingRef.current) return;
@@ -76,7 +74,7 @@ function MicSender({ talking }) {
         const int16 =
           new Int16Array(input.length);
 
-        // 🔥 VOLUME BOOST
+        //  VOLUME BOOST
         for (let i = 0; i < input.length; i++) {
 
           let sample = input[i];
