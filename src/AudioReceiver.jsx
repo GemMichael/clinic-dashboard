@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 function AudioReceiver() {
+    console.log("AudioReceiver mounted");
   useEffect(() => {
     let socket;
 
@@ -60,7 +61,7 @@ function AudioReceiver() {
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
-        socket.send(
+        socket.send( 
           JSON.stringify({
             type: "register",
             role: "nurseReceiver"
