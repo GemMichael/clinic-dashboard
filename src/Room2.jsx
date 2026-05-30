@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ref, set, onValue } from "firebase/database";
 import { db } from "./firebase";
-import MicSender from "./Room2MicSender";
+import Room2MicSender from "./Room2MicSender";
 import Room2AudioReceiver from "./Room2AudioReceiver";
 
 function Room2() {
@@ -31,7 +31,7 @@ function Room2() {
   return (
     <>
       <Room2AudioReceiver />
-      <MicSender
+      <Room2MicSender
         talking={
           talking &&
           activeRoom === "room2"
