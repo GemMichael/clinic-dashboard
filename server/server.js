@@ -59,6 +59,7 @@ wss.on("connection", (ws, req) => {
         room2Socket.readyState === WebSocket.OPEN
       ) {
 
+        console.log("Nurse -> Room2");
         room2Socket.send(data);
       }
 
@@ -70,6 +71,7 @@ wss.on("connection", (ws, req) => {
         nurseSocket.readyState === WebSocket.OPEN
       ) {
 
+        console.log("Room2 -> Nurse");
         nurseSocket.send(data);
       }
     }
@@ -78,14 +80,16 @@ wss.on("connection", (ws, req) => {
 
   ws.on("close", () => {
 
-    if (ws === nurseSocket) {
+    if (ws.role === "nurse") {
 
-      nurseSocket = null;
+      console.log("NURSE REGISTERED");
+      nurseSocket = ws;
     }
 
-    if (ws === room2Socket) {
+    if (ws.role === "room2") {
 
-      room2Socket = null;
+      console.log("ROOM2 REGISTERED");
+      room2Socket = ws;
     }
 
     console.log("Client disconnected");
