@@ -32,6 +32,12 @@ function App() {
 
   const [showUsers, setShowUsers] = useState(false);
 
+  const [room2Alert, setRoom2Alert] =
+    useState(false);
+
+  const [activeRoom, setActiveRoom] =
+    useState("room1");
+
   // AUDIO UNLOCK
 
   useEffect(() => {
@@ -85,6 +91,37 @@ function App() {
       } else {
 
         setAlert(false);
+      }
+    });
+
+    // ROOM 2 PANIC
+    const panic2Ref =
+      ref(db, "panic2");
+
+    onValue(panic2Ref, (snapshot) => {
+
+      const value = snapshot.val();
+
+      if (value === true) {
+
+        setRoom2Alert(true);
+
+        if (alarmRef.current) {
+
+          alarmRef.current.loop = true;
+
+          alarmRef.current.play()
+            .then(() => {
+              console.log("ROOM 2 ALARM PLAYING");
+            })
+            .catch((err) => {
+              console.log("ROOM 2 AUDIO ERROR", err);
+            });
+        }
+
+      } else {
+
+        setRoom2Alert(false);
       }
     });
 
@@ -144,6 +181,18 @@ function App() {
       }
     });
 
+    // ACTIVE ROOM
+
+    const activeRoomRef =
+      ref(db, "activeRoom");
+
+    onValue(activeRoomRef, (snapshot) => {
+
+      setActiveRoom(
+        snapshot.val() || "room1"
+      );
+
+    });
     //  USERS
     const usersRef =
       ref(db, "users");
@@ -189,9 +238,11 @@ function App() {
 
   // OK BUTTON
 
-  const handleOK = () => {
+  const handleRoom1 = () => {
 
     set(ref(db, "panic"), false);
+
+    set(ref(db, "activeRoom"), "room1");
 
     if (alarmRef.current) {
 
@@ -201,10 +252,25 @@ function App() {
     }
   };
 
+  const handleRoom2 = () => {
+
+    set(ref(db, "panic2"), false);
+
+    set(ref(db, "activeRoom"), "room2");
+
+    if (alarmRef.current) {
+
+      alarmRef.current.pause();
+
+      alarmRef.current.currentTime = 0;
+    }
+  };
   return (
 
     <div
-      className={`app-container ${alert ? "alert-mode" : ""
+      className={`app-container ${(alert || room2Alert)
+        ? "alert-mode"
+        : ""
         }`}
     >
 
@@ -230,7 +296,7 @@ function App() {
         </h1>
 
         {/*  ALERT */}
-        {alert && (
+        {(alert || room2Alert) && (
 
           <div className="alert-box">
 
@@ -238,12 +304,39 @@ function App() {
               🚨 EMERGENCY ALERT 🚨
             </h2>
 
-            <button
-              className="btn-ok"
-              onClick={handleOK}
-            >
-              OK
-            </button>
+            <div>
+
+              {alert && (
+                <div>🏥 ROOM 1</div>
+              )}
+
+              {room2Alert && (
+                <div>🏥 ROOM 2</div>
+              )}
+
+            </div>
+
+            {alert && (
+
+              <button
+                className="btn-ok"
+                onClick={handleRoom1}
+              >
+                Resolve Room 1
+              </button>
+
+            )}
+
+            {room2Alert && (
+
+              <button
+                className="btn-ok"
+                onClick={handleRoom2}
+              >
+                Resolve Room 2
+              </button>
+
+            )}
 
           </div>
         )}

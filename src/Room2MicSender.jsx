@@ -25,7 +25,7 @@ function MicSender({ talking }) {
       socketRef.current.send(
         JSON.stringify({
           type: "register",
-          role: "nurse"
+          role: "room2"
         })
       );
 
