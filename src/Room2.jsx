@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ref, set, onValue } from "firebase/database";
 import { db } from "./firebase";
 import MicSender from "./Room2MicSender";
+import AudioReceiver from "./AudioReceiver";
 
 function Room2() {
   const [talking, setTalking] = useState(false);
@@ -29,6 +30,7 @@ function Room2() {
 
   return (
     <>
+      <AudioReceiver />
       <MicSender
         talking={
           talking &&
