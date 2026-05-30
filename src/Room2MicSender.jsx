@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-function MicSender({ talking }) {
+function Room2MicSender({ talking }) {
 
   const socketRef = useRef(null);
 
@@ -25,7 +25,7 @@ function MicSender({ talking }) {
       socketRef.current.send(
         JSON.stringify({
           type: "register",
-          role: "room2"
+          role: "room2Sender"
         })
       );
 
@@ -136,4 +136,4 @@ function MicSender({ talking }) {
   return null;
 }
 
-export default MicSender;
+export default Room2MicSender;
