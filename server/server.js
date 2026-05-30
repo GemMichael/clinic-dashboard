@@ -1,6 +1,9 @@
 const WebSocket = require("ws");
-let nurseSocket = null;
-let room2Socket = null;
+let nurseSender = null;
+let nurseReceiver = null;
+
+let room2Sender = null;
+let room2Receiver = null;
 
 const port = process.env.PORT || 3000;
 
@@ -31,19 +34,23 @@ wss.on("connection", (ws, req) => {
 
         ws.role = msg.role;
 
-        console.log(
-          "Registered:",
-          ws.role
-        );
+        switch (msg.role) {
 
-        if (ws.role === "nurse") {
+          case "nurseSender":
+            nurseSender = ws;
+            break;
 
-          nurseSocket = ws;
-        }
+          case "nurseReceiver":
+            nurseReceiver = ws;
+            break;
 
-        if (ws.role === "room2") {
+          case "room2Sender":
+            room2Sender = ws;
+            break;
 
-          room2Socket = ws;
+          case "room2Receiver":
+            room2Receiver = ws;
+            break;
         }
 
         return;
@@ -51,46 +58,43 @@ wss.on("connection", (ws, req) => {
 
     } catch {
 
-      // AUDIO FROM NURSE
-
       if (
-        ws.role === "nurse" &&
-        room2Socket &&
-        room2Socket.readyState === WebSocket.OPEN
+        ws.role === "nurseSender" &&
+        room2Receiver &&
+        room2Receiver.readyState === WebSocket.OPEN
       ) {
 
         console.log("Nurse -> Room2");
-        room2Socket.send(data);
+
+        room2Receiver.send(data);
       }
 
-      // AUDIO FROM ROOM2
-
       if (
-        ws.role === "room2" &&
-        nurseSocket &&
-        nurseSocket.readyState === WebSocket.OPEN
+        ws.role === "room2Sender" &&
+        nurseReceiver &&
+        nurseReceiver.readyState === WebSocket.OPEN
       ) {
 
         console.log("Room2 -> Nurse");
-        nurseSocket.send(data);
-      }
-    }
 
+        nurseReceiver.send(data);
+      }
+
+    }
   });
 
   ws.on("close", () => {
+    if (ws === nurseSender)
+      nurseSender = null;
 
-    if (ws.role === "nurse") {
+    if (ws === nurseReceiver)
+      nurseReceiver = null;
 
-      console.log("NURSE REGISTERED");
-      nurseSocket = ws;
-    }
+    if (ws === room2Sender)
+      room2Sender = null;
 
-    if (ws.role === "room2") {
-
-      console.log("ROOM2 REGISTERED");
-      room2Socket = ws;
-    }
+    if (ws === room2Receiver)
+      room2Receiver = null;
 
     console.log("Client disconnected");
   });

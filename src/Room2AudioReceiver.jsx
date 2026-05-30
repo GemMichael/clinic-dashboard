@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-function AudioReceiver() {
+function Room2AudioReceiver() {
   useEffect(() => {
     let socket;
 
@@ -63,7 +63,7 @@ function AudioReceiver() {
         socket.send(
           JSON.stringify({
             type: "register",
-            role: "nurseReceiver"
+            role: "room2Receiver"
           })
         );
         console.log("✅ Connected");
@@ -106,4 +106,4 @@ function AudioReceiver() {
   return null;
 }
 
-export default AudioReceiver;
+export default Room2AudioReceiver;
