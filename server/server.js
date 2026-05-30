@@ -34,24 +34,37 @@ wss.on("connection", (ws, req) => {
 
         ws.role = msg.role;
 
+        console.log("REGISTERED:", msg.role);
+
         switch (msg.role) {
 
           case "nurseSender":
             nurseSender = ws;
+            console.log("nurseSender assigned");
             break;
 
           case "nurseReceiver":
             nurseReceiver = ws;
+            console.log("nurseReceiver assigned");
             break;
 
           case "room2Sender":
             room2Sender = ws;
+            console.log("room2Sender assigned");
             break;
 
           case "room2Receiver":
             room2Receiver = ws;
+            console.log("room2Receiver assigned");
             break;
         }
+
+        console.log({
+          nurseSender: !!nurseSender,
+          nurseReceiver: !!nurseReceiver,
+          room2Sender: !!room2Sender,
+          room2Receiver: !!room2Receiver
+        });
 
         return;
       }
