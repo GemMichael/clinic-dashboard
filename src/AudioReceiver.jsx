@@ -64,6 +64,10 @@ function AudioReceiver() {
       };
 
       socket.onmessage = (event) => {
+        console.log(
+          "AUDIO RECEIVED",
+          event.data.byteLength
+        );
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
 
