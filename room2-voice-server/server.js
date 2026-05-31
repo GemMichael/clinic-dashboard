@@ -1,10 +1,7 @@
 const WebSocket = require("ws");
 
-let nurseSender = null;
-let nurseReceiver = null;
-
-let room2Sender = null;
-let room2Receiver = null;
+let nurse = null;
+let room2 = null;
 
 const port = process.env.PORT || 3000;
 
@@ -13,9 +10,14 @@ const wss = new WebSocket.Server({
   perMessageDeflate: false,
 });
 
-console.log("Room2 Voice Server running:", port);
+console.log(
+  "Room2 Voice Server running:",
+  port
+);
 
 wss.on("connection", (ws) => {
+
+  console.log("Client connected");
 
   ws.on("message", (data) => {
 
@@ -26,27 +28,22 @@ wss.on("connection", (ws) => {
 
       if (msg.type === "register") {
 
-        switch (msg.role) {
+        if (msg.role === "nurse") {
 
-          case "nurseSender":
-            nurseSender = ws;
-            console.log("Registered Nurse Sender");
-            break;
+          nurse = ws;
 
-          case "nurseReceiver":
-            nurseReceiver = ws;
-            console.log("Registered Nurse Receiver");
-            break;
+          console.log(
+            "Nurse Connected"
+          );
+        }
 
-          case "room2Sender":
-            room2Sender = ws;
-            console.log("Registered Room2 Sender");
-            break;
+        if (msg.role === "room2") {
 
-          case "room2Receiver":
-            room2Receiver = ws;
-            console.log("Registered Room2 Receiver");
-            break;
+          room2 = ws;
+
+          console.log(
+            "Room2 Connected"
+          );
         }
 
         return;
@@ -54,39 +51,50 @@ wss.on("connection", (ws) => {
 
     } catch {
 
-      if (
-        ws === nurseSender &&
-        room2Receiver &&
-        room2Receiver.readyState === WebSocket.OPEN
-      ) {
-
-        console.log("Nurse -> Room2");
-
-        room2Receiver.send(data);
-      }
+      // NURSE -> ROOM2
 
       if (
-        ws === room2Sender &&
-        nurseReceiver &&
-        nurseReceiver.readyState === WebSocket.OPEN
+        ws === nurse &&
+        room2 &&
+        room2.readyState === WebSocket.OPEN
       ) {
 
-        console.log("Room2 -> Nurse");
+        console.log(
+          "Nurse -> Room2"
+        );
 
-        nurseReceiver.send(data);
+        room2.send(data);
       }
 
+      // ROOM2 -> NURSE
+
+      if (
+        ws === room2 &&
+        nurse &&
+        nurse.readyState === WebSocket.OPEN
+      ) {
+
+        console.log(
+          "Room2 -> Nurse"
+        );
+
+        nurse.send(data);
+      }
     }
 
   });
 
   ws.on("close", () => {
 
-    if (ws === nurseSender) nurseSender = null;
-    if (ws === nurseReceiver) nurseReceiver = null;
-    if (ws === room2Sender) room2Sender = null;
-    if (ws === room2Receiver) room2Receiver = null;
+    if (ws === nurse)
+      nurse = null;
 
+    if (ws === room2)
+      room2 = null;
+
+    console.log(
+      "Client disconnected"
+    );
   });
 
 });
