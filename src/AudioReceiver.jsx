@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 
-function AudioReceiver() {
+function AudioReceiver({
+  activeRoom
+}) {
   useEffect(() => {
     let socket;
 
@@ -56,7 +58,18 @@ function AudioReceiver() {
     function connectSocket() {
       console.log("🔄 Connecting...");
 
-      socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
+      const wsUrl =
+        activeRoom === "room2"
+          ? "wss://clinic-dashboard-4.onrender.com"
+          : "wss://clinic-dashboard-1-xlgb.onrender.com";
+
+      console.log(
+        "RECEIVER CONNECTING TO:",
+        wsUrl
+      );
+
+      socket =
+        new WebSocket(wsUrl);
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
@@ -91,7 +104,7 @@ function AudioReceiver() {
     }
 
     connectSocket();
-  }, []);
+  }, [activeRoom]);
 
   return null;
 }

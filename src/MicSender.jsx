@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 
-function MicSender({ talking }) {
+function MicSender({
+  talking,
+  activeRoom
+}) {
 
   const socketRef = useRef(null);
 
@@ -13,9 +16,18 @@ function MicSender({ talking }) {
     // =========================
     // WEBSOCKET
     // =========================
-    socketRef.current = new WebSocket(
-      "wss://clinic-dashboard-1-xlgb.onrender.com"
+    const wsUrl =
+      activeRoom === "room2"
+
+        ? "wss://clinic-dashboard-4.onrender.com"
+        : "wss://clinic-dashboard-1-xlgb.onrender.com";
+    console.log(
+      "MIC CONNECTING TO:",
+      wsUrl
     );
+
+    socketRef.current =
+      new WebSocket(wsUrl);
 
     socketRef.current.binaryType = "arraybuffer";
 
@@ -123,7 +135,7 @@ function MicSender({ talking }) {
       }
     };
 
-  }, []);
+  }, [activeRoom]);
 
   return null;
 }

@@ -282,10 +282,14 @@ function App() {
       />
 
       {/*  AUDIO */}
-      <AudioReceiver />
-
-      <MicSender talking={talking} />
-
+      <AudioReceiver
+        activeRoom={activeRoom}
+      />
+      
+      <MicSender
+        talking={talking}
+        activeRoom={activeRoom}
+      />
 
       {/* MAIN CARD */}
 
