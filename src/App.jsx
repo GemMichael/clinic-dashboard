@@ -250,6 +250,11 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
+    setTimeout(() => {
+
+      window.location.reload();
+
+    }, 500);
   };
 
   const handleRoom2 = () => {
@@ -264,6 +269,11 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
+    setTimeout(() => {
+
+      window.location.reload();
+
+    }, 500);
   };
   return (
 
@@ -285,7 +295,7 @@ function App() {
       <AudioReceiver
         activeRoom={activeRoom}
       />
-      
+
       <MicSender
         talking={talking}
         activeRoom={activeRoom}
