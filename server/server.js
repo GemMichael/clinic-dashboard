@@ -1,5 +1,8 @@
 const WebSocket = require("ws");
 
+let nurseSender = null;
+let nurseReceiver = null;
+
 const port = process.env.PORT || 3000;
 
 const wss = new WebSocket.Server({
@@ -11,6 +14,8 @@ console.log("WebSocket running on port:", port);
 
 wss.on("connection", (ws, req) => {
 
+  ws.role = null;
+
   console.log(
     "Client connected:",
     req.socket.remoteAddress
@@ -18,25 +23,76 @@ wss.on("connection", (ws, req) => {
 
   ws.on("message", (data) => {
 
-    // 🔥 DEBUG
-    console.log("Audio packet:", data.length);
+    try {
 
-    // 🔥 SEND ONLY TO OTHER CLIENTS
-    wss.clients.forEach((client) => {
+      const msg =
+        JSON.parse(data.toString());
+
+      if (msg.type === "register") {
+
+        ws.role = msg.role;
+
+        if (msg.role === "nurseSender") {
+
+          nurseSender = ws;
+
+          console.log(
+            "Nurse Sender Registered"
+          );
+        }
+
+        if (msg.role === "nurseReceiver") {
+
+          nurseReceiver = ws;
+
+          console.log(
+            "Nurse Receiver Registered"
+          );
+        }
+
+        return;
+      }
+
+    } catch {
+
+      console.log(
+        "Audio packet:",
+        data.length
+      );
+
+      // 🚫 DON'T SEND NURSE AUDIO
+      // BACK TO NURSE
+
+      if (ws === nurseSender) {
+
+        return;
+      }
+
+      // ✅ SEND ESP32 AUDIO
+      // TO NURSE RECEIVER
 
       if (
-        client !== ws &&
-        client.readyState === WebSocket.OPEN
+        nurseReceiver &&
+        nurseReceiver.readyState ===
+        WebSocket.OPEN
       ) {
 
-        client.send(data);
+        nurseReceiver.send(data);
       }
-    });
+    }
   });
 
   ws.on("close", () => {
 
-    console.log("Client disconnected");
+    if (ws === nurseSender)
+      nurseSender = null;
+
+    if (ws === nurseReceiver)
+      nurseReceiver = null;
+
+    console.log(
+      "Client disconnected"
+    );
   });
 
   ws.on("error", (err) => {
