@@ -14,7 +14,7 @@ function Room2MicSender({ talking }) {
     // WEBSOCKET
     // =========================
     socketRef.current = new WebSocket(
-      "wss://clinic-dashboard-1-xlgb.onrender.com"
+      "wss://clinic-dashboard-4.onrender.com"
     );
 
     socketRef.current.binaryType = "arraybuffer";

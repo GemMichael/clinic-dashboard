@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 function AudioReceiver() {
-    console.log("AudioReceiver mounted");
   useEffect(() => {
     let socket;
 
@@ -61,20 +60,10 @@ function AudioReceiver() {
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
-        socket.send( 
-          JSON.stringify({
-            type: "register",
-            role: "nurseReceiver"
-          })
-        );
         console.log("✅ Connected");
       };
 
       socket.onmessage = (event) => {
-        console.log(
-          "AUDIO RECEIVED",
-          event.data.byteLength
-        );
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
 

@@ -19,15 +19,7 @@ function MicSender({ talking }) {
 
     socketRef.current.binaryType = "arraybuffer";
 
-
     socketRef.current.onopen = async () => {
-
-      socketRef.current.send(
-        JSON.stringify({
-          type: "register",
-          role: "nurseSender"
-        })
-      );
 
       console.log("Mic Connected");
 
