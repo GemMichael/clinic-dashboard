@@ -85,8 +85,6 @@ function MicSender({
 
       source.connect(processor);
 
-      processor.connect(audioCtx.destination);
-
       // =========================
       // AUDIO PROCESS
       // =========================
