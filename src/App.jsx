@@ -250,11 +250,14 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
-    setTimeout(() => {
+    // only refresh if room2 is already cleared
+    if (!room2Alert) {
 
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
 
-    }, 500);
+    }
   };
 
   const handleRoom2 = () => {
@@ -269,11 +272,14 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
+  // only refresh if room1 is already cleared
+  if (!alert) {
+
     setTimeout(() => {
-
       window.location.reload();
-
     }, 500);
+
+  }
   };
   return (
 
