@@ -63,7 +63,7 @@ function Room2AudioReceiver() {
         socket.send(
           JSON.stringify({
             type: "register",
-            role: "room2Receiver"
+            role: "room2"
           })
         );
         console.log("✅ Connected");

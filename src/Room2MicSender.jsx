@@ -25,7 +25,7 @@ function Room2MicSender({ talking }) {
       socketRef.current.send(
         JSON.stringify({
           type: "register",
-          role: "room2Sender"
+          role: "room2"
         })
       );
 

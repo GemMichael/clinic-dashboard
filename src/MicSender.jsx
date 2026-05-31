@@ -32,7 +32,19 @@ function MicSender({
     socketRef.current.binaryType = "arraybuffer";
 
     socketRef.current.onopen = async () => {
+      if (activeRoom === "room2") {
 
+        socketRef.current.send(
+          JSON.stringify({
+            type: "register",
+            role: "nurse"
+          })
+        );
+
+        console.log(
+          "Registered Nurse Sender"
+        );
+      }
       console.log("Mic Connected");
 
       // =========================

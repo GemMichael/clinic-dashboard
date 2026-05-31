@@ -73,6 +73,21 @@ function AudioReceiver({
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {
+
+        if (activeRoom === "room2") {
+
+          socket.send(
+            JSON.stringify({
+              type: "register",
+              role: "nurse"
+            })
+          );
+
+          console.log(
+            "Registered Nurse Receiver"
+          );
+        }
+
         console.log("✅ Connected");
       };
 
