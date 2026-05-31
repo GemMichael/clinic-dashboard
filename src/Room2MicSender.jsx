@@ -62,7 +62,7 @@ function Room2MicSender({ talking }) {
       // 🔥 SMALLER BUFFER
       const processor =
         audioCtx.createScriptProcessor(
-          256,
+          1024,
           1,
           1
         );
@@ -93,7 +93,7 @@ function Room2MicSender({ talking }) {
           sample = Math.max(-1, Math.min(1, sample));
 
           // CONVERT FLOAT → PCM16
-          int16[i] = sample * 12000;
+          int16[i] = sample * 28000;
         }
 
         if (

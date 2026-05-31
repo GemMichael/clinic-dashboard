@@ -31,7 +31,7 @@ function Room2AudioReceiver() {
     lowpass.connect(audioCtx.destination);
 
     // 🔥 LOW LATENCY scheduling
-    let nextTime = audioCtx.currentTime;
+    let nextTime = audioCtx.currentTime + 0.1;
 
     const playChunk = (float32Data) => {
       const buffer = audioCtx.createBuffer(1, float32Data.length, 16000);
