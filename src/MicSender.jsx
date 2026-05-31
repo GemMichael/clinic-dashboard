@@ -12,6 +12,10 @@ function MicSender({
   talkingRef.current = talking;
 
   useEffect(() => {
+    console.log(
+      "MIC EFFECT RUN"
+    );
+    let reconnect = true;
 
     // =========================
     // WEBSOCKET
@@ -142,6 +146,12 @@ function MicSender({
     };
 
     return () => {
+
+      console.log(
+        "Mic Destroyed"
+      );
+
+      reconnect = false;
 
       if (socketRef.current) {
 

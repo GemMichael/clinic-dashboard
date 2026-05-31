@@ -4,7 +4,11 @@ function AudioReceiver({
   activeRoom
 }) {
   useEffect(() => {
+    console.log(
+      "RECEIVER EFFECT RUN"
+    );
     let socket;
+    let reconnect = true;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -71,7 +75,7 @@ function AudioReceiver({
       socket =
         new WebSocket(wsUrl);
       socket.binaryType = "arraybuffer";
-      
+
 
       socket.onopen = () => {
 
@@ -94,16 +98,16 @@ function AudioReceiver({
 
       socket.onmessage = (event) => {
 
-          console.log(
-    "AUDIO RECEIVED",
-    activeRoom
-  );
+        console.log(
+          "AUDIO RECEIVED",
+          activeRoom
+        );
 
-  console.log("RECEIVER EFFECT RUN");
+        console.log("RECEIVER EFFECT RUN");
 
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
-        
+
 
         for (let i = 0; i < int16Data.length; i++) {
           let sample = int16Data[i] / 32768;
@@ -113,15 +117,22 @@ function AudioReceiver({
 
           float32Data[i] = sample;
         }
-        
+
 
         // 🔥 LOW LATENCY (no queue)
         playChunk(float32Data);
       };
 
       socket.onclose = () => {
+
+        if (!reconnect) return;
+
         console.log("⚠️ Reconnecting...");
-        setTimeout(connectSocket, 2000);
+
+        setTimeout(
+          connectSocket,
+          2000
+        );
       };
 
       socket.onerror = () => {
@@ -130,6 +141,22 @@ function AudioReceiver({
     }
 
     connectSocket();
+
+    return () => {
+
+      console.log(
+        "Receiver Destroyed"
+      );
+
+
+      reconnect = false;
+
+      if (socket) {
+        socket.close();
+      }
+
+    };
+
   }, [activeRoom]);
 
   return null;
