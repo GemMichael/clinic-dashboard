@@ -129,6 +129,8 @@ function MicSender({
       };
     };
 
+    console.log("MIC EFFECT RUN");
+
     socketRef.current.onerror = (err) => {
 
       console.log("Mic Socket Error", err);

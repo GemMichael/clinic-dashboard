@@ -98,7 +98,9 @@ function AudioReceiver({
     "AUDIO RECEIVED",
     activeRoom
   );
-  
+
+  console.log("RECEIVER EFFECT RUN");
+
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
         
