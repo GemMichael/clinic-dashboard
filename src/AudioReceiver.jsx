@@ -79,7 +79,7 @@ function AudioReceiver({
           socket.send(
             JSON.stringify({
               type: "register",
-              role: "nurse"
+              role: "nurseReceiver"
             })
           );
 
