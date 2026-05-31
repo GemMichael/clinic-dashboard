@@ -15,7 +15,8 @@ function MicSender({
     console.log(
       "MIC EFFECT RUN"
     );
-    let reconnect = true;
+
+    let stream;
 
     // =========================
     // WEBSOCKET
@@ -54,7 +55,7 @@ function MicSender({
       // =========================
       // GET MICROPHONE
       // =========================
-      const stream =
+      stream =
         await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: false,
@@ -133,7 +134,6 @@ function MicSender({
       };
     };
 
-    console.log("MIC EFFECT RUN");
 
     socketRef.current.onerror = (err) => {
 
@@ -151,10 +151,13 @@ function MicSender({
         "Mic Destroyed"
       );
 
-      reconnect = false;
+      if (stream) {
+        stream.getTracks().forEach(track =>
+          track.stop()
+        );
+      }
 
       if (socketRef.current) {
-
         socketRef.current.close();
       }
     };
