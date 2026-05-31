@@ -71,6 +71,7 @@ function AudioReceiver({
       socket =
         new WebSocket(wsUrl);
       socket.binaryType = "arraybuffer";
+      
 
       socket.onopen = () => {
 
@@ -92,8 +93,15 @@ function AudioReceiver({
       };
 
       socket.onmessage = (event) => {
+
+          console.log(
+    "AUDIO RECEIVED",
+    activeRoom
+  );
+  
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
+        
 
         for (let i = 0; i < int16Data.length; i++) {
           let sample = int16Data[i] / 32768;
@@ -103,6 +111,7 @@ function AudioReceiver({
 
           float32Data[i] = sample;
         }
+        
 
         // 🔥 LOW LATENCY (no queue)
         playChunk(float32Data);
