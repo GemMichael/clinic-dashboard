@@ -4,6 +4,7 @@ let nurseSender = null;
 let nurseReceiver = null;
 
 let room1Sender = null;
+let room1Receiver = null;
 
 const port = process.env.PORT || 3000;
 
@@ -31,6 +32,15 @@ wss.on("connection", (ws, req) => {
         JSON.parse(data.toString());
 
       if (msg.type === "register") {
+
+        if (msg.role === "room1Receiver") {
+
+          room1Receiver = ws;
+
+          console.log(
+            "Room1 Receiver Registered"
+          );
+        }
 
         ws.role = msg.role;
 
@@ -76,9 +86,18 @@ wss.on("connection", (ws, req) => {
 
       if (ws === nurseSender) {
 
-        console.log(
-          "Ignoring nurse audio"
-        );
+        if (
+          room1Receiver &&
+          room1Receiver.readyState === WebSocket.OPEN
+        ) {
+
+          console.log(
+            "Forwarding Nurse -> Room1",
+            data.length
+          );
+
+          room1Receiver.send(data);
+        }
 
         return;
       }
