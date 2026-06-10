@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 
-function MicSender({
-  talking,
-  activeRoom
-}) {
+function MicSender({ talking }) {
 
   const socketRef = useRef(null);
 
@@ -12,50 +9,24 @@ function MicSender({
   talkingRef.current = talking;
 
   useEffect(() => {
-    console.log(
-      "MIC EFFECT RUN"
-    );
-
-    let stream;
 
     // =========================
     // WEBSOCKET
     // =========================
-    const wsUrl =
-      activeRoom === "room2"
-
-        ? "wss://clinic-dashboard-4.onrender.com"
-        : "wss://clinic-dashboard-1-xlgb.onrender.com";
-    console.log(
-      "MIC CONNECTING TO:",
-      wsUrl
+    socketRef.current = new WebSocket(
+      "wss://clinic-dashboard-1-xlgb.onrender.com"
     );
-
-    socketRef.current =
-      new WebSocket(wsUrl);
 
     socketRef.current.binaryType = "arraybuffer";
 
     socketRef.current.onopen = async () => {
-      if (activeRoom === "room2") {
 
-        socketRef.current.send(
-          JSON.stringify({
-            type: "register",
-            role: "nurseSender"
-          })
-        );
-
-        console.log(
-          "Registered Nurse Sender"
-        );
-      }
       console.log("Mic Connected");
 
       // =========================
       // GET MICROPHONE
       // =========================
-      stream =
+      const stream =
         await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: false,
@@ -83,7 +54,7 @@ function MicSender({
       // 🔥 SMALLER BUFFER
       const processor =
         audioCtx.createScriptProcessor(
-          1024,
+          256,
           1,
           1
         );
@@ -114,7 +85,7 @@ function MicSender({
           sample = Math.max(-1, Math.min(1, sample));
 
           // CONVERT FLOAT → PCM16
-          int16[i] = sample * 28000;
+          int16[i] = sample * 12000;
         }
 
         if (
@@ -134,7 +105,6 @@ function MicSender({
       };
     };
 
-
     socketRef.current.onerror = (err) => {
 
       console.log("Mic Socket Error", err);
@@ -147,22 +117,13 @@ function MicSender({
 
     return () => {
 
-      console.log(
-        "Mic Destroyed"
-      );
-
-      if (stream) {
-        stream.getTracks().forEach(track =>
-          track.stop()
-        );
-      }
-
       if (socketRef.current) {
+
         socketRef.current.close();
       }
     };
 
-  }, [activeRoom]);
+  }, []);
 
   return null;
 }
