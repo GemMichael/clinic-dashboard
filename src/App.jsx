@@ -5,10 +5,8 @@ import AudioReceiver from "./AudioReceiver";
 import MicSender from "./MicSender";
 
 function App() {
-
-  // =========================
   // STATES
-  // =========================
+
   const [alert, setAlert] = useState(false);
 
   const [talking, setTalking] = useState(false);
@@ -32,9 +30,16 @@ function App() {
 
   const audioCtxRef = useRef(null);
 
-  // =========================
+  const [showUsers, setShowUsers] = useState(false);
+
+  const [room2Alert, setRoom2Alert] =
+    useState(false);
+
+  const [activeRoom, setActiveRoom] =
+    useState("room1");
+
   // AUDIO UNLOCK
-  // =========================
+
   useEffect(() => {
 
     audioCtxRef.current =
@@ -60,12 +65,11 @@ function App() {
 
   }, []);
 
-  // =========================
   // FIREBASE LISTENERS
-  // =========================
+
   useEffect(() => {
 
-    // 🚨 PANIC
+    //  PANIC
     const panicRef =
       ref(db, "panic");
 
@@ -81,7 +85,7 @@ function App() {
 
           alarmRef.current.loop = true;
 
-          alarmRef.current.play().catch(() => {});
+          alarmRef.current.play().catch(() => { });
         }
 
       } else {
@@ -90,7 +94,38 @@ function App() {
       }
     });
 
-    // 👆 FINGERPRINT STATUS
+    // ROOM 2 PANIC
+    const panic2Ref =
+      ref(db, "panic2");
+
+    onValue(panic2Ref, (snapshot) => {
+
+      const value = snapshot.val();
+
+      if (value === true) {
+
+        setRoom2Alert(true);
+
+        if (alarmRef.current) {
+
+          alarmRef.current.loop = true;
+
+          alarmRef.current.play()
+            .then(() => {
+              console.log("ROOM 2 ALARM PLAYING");
+            })
+            .catch((err) => {
+              console.log("ROOM 2 AUDIO ERROR", err);
+            });
+        }
+
+      } else {
+
+        setRoom2Alert(false);
+      }
+    });
+
+    //  FINGERPRINT STATUS
     const fingerRef =
       ref(db, "fingerprint/status");
 
@@ -104,7 +139,7 @@ function App() {
       }
     });
 
-    // 👆 LAST ID
+    //  LAST ID
     const fingerIDRef =
       ref(db, "fingerprint/lastID");
 
@@ -118,7 +153,7 @@ function App() {
       }
     });
 
-    // 🚨 PANIC LOGS
+    // PANIC LOGS
     const logsRef =
       ref(db, "panicLogs");
 
@@ -146,7 +181,19 @@ function App() {
       }
     });
 
-    // 👤 USERS
+    // ACTIVE ROOM
+
+    const activeRoomRef =
+      ref(db, "activeRoom");
+
+    onValue(activeRoomRef, (snapshot) => {
+
+      setActiveRoom(
+        snapshot.val() || "room1"
+      );
+
+    });
+    //  USERS
     const usersRef =
       ref(db, "users");
 
@@ -162,9 +209,9 @@ function App() {
 
   }, []);
 
-  // =========================
+
   // SAVE USER
-  // =========================
+
   const saveUser = async () => {
 
     if (!fingerID || !userName) {
@@ -188,12 +235,14 @@ function App() {
     setUserName("");
   };
 
-  // =========================
+
   // OK BUTTON
-  // =========================
-  const handleOK = () => {
+
+  const handleRoom1 = () => {
 
     set(ref(db, "panic"), false);
+
+    set(ref(db, "activeRoom"), "room1");
 
     if (alarmRef.current) {
 
@@ -201,39 +250,73 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
+    // only refresh if room2 is already cleared
+    if (!room2Alert) {
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+
+    }
   };
 
+  const handleRoom2 = () => {
+
+    set(ref(db, "panic2"), false);
+
+    set(ref(db, "activeRoom"), "room2");
+
+    if (alarmRef.current) {
+
+      alarmRef.current.pause();
+
+      alarmRef.current.currentTime = 0;
+    }
+  // only refresh if room1 is already cleared
+  if (!alert) {
+
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+
+  }
+  };
   return (
 
     <div
-      className={`app-container ${
-        alert ? "alert-mode" : ""
-      }`}
+      className={`app-container ${(alert || room2Alert)
+        ? "alert-mode"
+        : ""
+        }`}
     >
 
-      {/* 🔊 ALARM */}
+      {/*  ALARM */}
       <audio
         ref={alarmRef}
         src="/alarm.mp3"
         preload="auto"
       />
 
-      {/* 🎤 AUDIO */}
-      <AudioReceiver />
+      {/*  AUDIO */}
+      <AudioReceiver
+        activeRoom={activeRoom}
+      />
 
-      <MicSender talking={talking} />
+      <MicSender
+        talking={talking}
+        activeRoom={activeRoom}
+      />
 
-      {/* ========================= */}
       {/* MAIN CARD */}
-      {/* ========================= */}
+
       <div className="main-card">
 
         <h1 className="title">
           🚑 CERMedi-ALERT
         </h1>
 
-        {/* 🚨 ALERT */}
-        {alert && (
+        {/*  ALERT */}
+        {(alert || room2Alert) && (
 
           <div className="alert-box">
 
@@ -241,19 +324,46 @@ function App() {
               🚨 EMERGENCY ALERT 🚨
             </h2>
 
-            <button
-              className="btn-ok"
-              onClick={handleOK}
-            >
-              OK
-            </button>
+            <div>
+
+              {alert && (
+                <div>🏥 ROOM 1</div>
+              )}
+
+              {room2Alert && (
+                <div>🏥 ROOM 2</div>
+              )}
+
+            </div>
+
+            {alert && (
+
+              <button
+                className="btn-ok"
+                onClick={handleRoom1}
+              >
+                Resolve Room 1
+              </button>
+
+            )}
+
+            {room2Alert && (
+
+              <button
+                className="btn-ok"
+                onClick={handleRoom2}
+              >
+                Resolve Room 2
+              </button>
+
+            )}
 
           </div>
         )}
 
-        {/* ========================= */}
+
         {/* FINGERPRINT */}
-        {/* ========================= */}
+
         <div className="finger-box">
 
           <h3>
@@ -299,9 +409,8 @@ function App() {
 
         </div>
 
-        {/* ========================= */}
         {/* HISTORY */}
-        {/* ========================= */}
+
         <div className="history-card">
 
           <h3 className="history-title">
@@ -355,13 +464,12 @@ function App() {
 
         </div>
 
-        {/* ========================= */}
+
         {/* PUSH TO TALK */}
-        {/* ========================= */}
+
         <button
-          className={`ptt-btn ${
-            talking ? "talking" : ""
-          }`}
+          className={`ptt-btn ${talking ? "talking" : ""
+            }`}
           onPointerDown={() => setTalking(true)}
           onPointerUp={() => setTalking(false)}
           onPointerLeave={() => setTalking(false)}
@@ -375,11 +483,60 @@ function App() {
 
         </button>
 
+
+        <button
+          className="users-btn"
+          onClick={() => setShowUsers(true)}
+        >
+          👥 VIEW USERS
+        </button>
+
+        {showUsers && (
+
+          <div className="modal-overlay">
+
+            <div className="modal-card">
+
+              <h2> Registered Users</h2>
+
+              <div className="users-list">
+
+                {Object.keys(users).length === 0 ? (
+
+                  <p>No users found</p>
+
+                ) : (
+
+                  Object.entries(users).map(([id, user]) => (
+
+                    <div key={id} className="user-item">
+
+                      <p><strong>ID:</strong> {id}</p>
+
+                      <p><strong>Name:</strong> {user.name}</p>
+
+                    </div>
+                  ))
+                )}
+
+              </div>
+
+              <button
+                className="close-btn"
+                onClick={() => setShowUsers(false)}
+              >
+                CLOSE
+              </button>
+
+            </div>
+
+          </div>
+        )}
+
       </div>
 
-      {/* ========================= */}
       {/* STYLES */}
-      {/* ========================= */}
+
       <style>{`
 
         body {
@@ -420,9 +577,8 @@ function App() {
           }
         }
 
-        /* ========================= */
         /* CARD */
-        /* ========================= */
+
         .main-card {
 
           width: 450px;
@@ -442,9 +598,9 @@ function App() {
           margin-bottom: 25px;
         }
 
-        /* ========================= */
+
         /* ALERT */
-        /* ========================= */
+
         .alert-box {
 
           background: #dc2626;
@@ -467,9 +623,9 @@ function App() {
           cursor: pointer;
         }
 
-        /* ========================= */
+
         /* FINGER BOX */
-        /* ========================= */
+
         .finger-box {
 
           background: #f8fafc;
@@ -500,9 +656,9 @@ function App() {
           color: #475569;
         }
 
-        /* ========================= */
+
         /* REGISTER */
-        /* ========================= */
+
         .register-box {
 
           margin-top: 20px;
@@ -537,9 +693,9 @@ function App() {
           background: #1d4ed8;
         }
 
-        /* ========================= */
+
         /* HISTORY */
-        /* ========================= */
+
         .history-card {
 
           margin-top: 25px;
@@ -583,9 +739,78 @@ function App() {
           color: #64748b;
         }
 
-        /* ========================= */
+        .users-btn {
+  margin-top: 15px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999;
+}
+
+.modal-card {
+  background: white;
+  width: 400px;
+  max-height: 500px;
+
+  border-radius: 20px;
+  padding: 20px;
+
+  overflow: hidden;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.users-list {
+  max-height: 300px;
+  overflow-y: auto;
+
+  margin-top: 20px;
+}
+
+.user-item {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.close-btn {
+  width: 100%;
+  margin-top: 20px;
+
+  padding: 12px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #dc2626;
+  color: white;
+
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
         /* PTT */
-        /* ========================= */
+
         .ptt-btn {
 
           width: 100%;

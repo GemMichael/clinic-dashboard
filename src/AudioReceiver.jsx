@@ -1,8 +1,11 @@
 import { useEffect } from "react";
 
-function AudioReceiver() {
+function AudioReceiver({
+  activeRoom
+}) {
   useEffect(() => {
     let socket;
+    let reconnect = true;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -31,7 +34,7 @@ function AudioReceiver() {
     lowpass.connect(audioCtx.destination);
 
     // 🔥 LOW LATENCY scheduling
-    let nextTime = audioCtx.currentTime;
+    let nextTime = audioCtx.currentTime + 0.1;
 
     const playChunk = (float32Data) => {
       const buffer = audioCtx.createBuffer(1, float32Data.length, 16000);
@@ -56,16 +59,47 @@ function AudioReceiver() {
     function connectSocket() {
       console.log("🔄 Connecting...");
 
-      socket = new WebSocket("wss://clinic-dashboard-1-xlgb.onrender.com");
+      const wsUrl =
+        activeRoom === "room2"
+          ? "wss://clinic-dashboard-4.onrender.com"
+          : "wss://clinic-dashboard-1-xlgb.onrender.com";
+
+      console.log(
+        "RECEIVER CONNECTING TO:",
+        wsUrl
+      );
+
+      socket =
+        new WebSocket(wsUrl);
       socket.binaryType = "arraybuffer";
 
+
       socket.onopen = () => {
+
+        socket.send(
+          JSON.stringify({
+            type: "register",
+            role: "nurseReceiver"
+          })
+        );
+
+        console.log(
+          "Registered Nurse Receiver"
+        );
+
         console.log("✅ Connected");
       };
 
       socket.onmessage = (event) => {
+
+        console.log(
+          "AUDIO RECEIVED",
+          activeRoom
+        );
+
         const int16Data = new Int16Array(event.data);
         const float32Data = new Float32Array(int16Data.length);
+
 
         for (let i = 0; i < int16Data.length; i++) {
           let sample = int16Data[i] / 32768;
@@ -76,13 +110,21 @@ function AudioReceiver() {
           float32Data[i] = sample;
         }
 
+
         // 🔥 LOW LATENCY (no queue)
         playChunk(float32Data);
       };
 
       socket.onclose = () => {
+
+        if (!reconnect) return;
+
         console.log("⚠️ Reconnecting...");
-        setTimeout(connectSocket, 2000);
+
+        setTimeout(
+          connectSocket,
+          2000
+        );
       };
 
       socket.onerror = () => {
@@ -91,7 +133,23 @@ function AudioReceiver() {
     }
 
     connectSocket();
-  }, []);
+
+    return () => {
+
+      console.log(
+        "Receiver Destroyed"
+      );
+
+
+      reconnect = false;
+
+      if (socket) {
+        socket.close();
+      }
+
+    };
+
+  }, [activeRoom]);
 
   return null;
 }
