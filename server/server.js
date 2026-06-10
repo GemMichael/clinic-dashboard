@@ -91,7 +91,10 @@ wss.on("connection", (ws, req) => {
           room1Receiver.readyState === WebSocket.OPEN
         ) {
 
-
+          console.log(
+            "Forwarding Nurse -> Room1",
+            data.length
+          );
 
           room1Receiver.send(data);
         }
@@ -107,6 +110,10 @@ wss.on("connection", (ws, req) => {
         nurseReceiver.readyState ===
         WebSocket.OPEN
       ) {
+        console.log(
+          "Forwarding Room1 -> Nurse",
+          data.length
+        );
 
         nurseReceiver.send(data);
       }
