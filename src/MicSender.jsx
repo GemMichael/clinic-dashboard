@@ -80,7 +80,7 @@ function MicSender({
       // 🔥 SMALLER BUFFER
       const processor =
         audioCtx.createScriptProcessor(
-          1024,
+          2048,
           1,
           1
         );
