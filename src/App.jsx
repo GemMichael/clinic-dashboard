@@ -91,6 +91,13 @@ function App() {
       } else {
 
         setAlert(false);
+
+        if (!room2Alert && alarmRef.current) {
+
+          alarmRef.current.pause();
+
+          alarmRef.current.currentTime = 0;
+        }
       }
     });
 
@@ -122,6 +129,13 @@ function App() {
       } else {
 
         setRoom2Alert(false);
+
+        if (!alert && alarmRef.current) {
+
+          alarmRef.current.pause();
+
+          alarmRef.current.currentTime = 0;
+        }
       }
     });
 
@@ -272,14 +286,14 @@ function App() {
 
       alarmRef.current.currentTime = 0;
     }
-  // only refresh if room1 is already cleared
-  if (!alert) {
+    // only refresh if room1 is already cleared
+    if (!alert) {
 
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
 
-  }
+    }
   };
   return (
 
