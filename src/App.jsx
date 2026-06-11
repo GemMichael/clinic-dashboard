@@ -92,7 +92,7 @@ function App() {
 
         setAlert(false);
 
-        if (!room2Alert && alarmRef.current) {
+        if (alarmRef.current) {
 
           alarmRef.current.pause();
 
@@ -130,7 +130,7 @@ function App() {
 
         setRoom2Alert(false);
 
-        if (!alert && alarmRef.current) {
+        if (alarmRef.current) {
 
           alarmRef.current.pause();
 
