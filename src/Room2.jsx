@@ -42,7 +42,14 @@ function Room2() {
         <div className="card">
 
           <div className="header">
-            <h1>🏥 CERMedi-ALERT</h1>
+            <h1 className="title">
+              <img
+                src="/logo.jpg"
+                alt="Hospital"
+                className="header-icon"
+              />
+              CERMedi-ALERT
+            </h1>
             <h2>ROOM 2</h2>
           </div>
 
@@ -165,6 +172,21 @@ function Room2() {
         font-weight:bold;
         cursor:pointer;
       }
+
+      .header h1{
+  color:#2563eb;
+  margin-bottom:10px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+}
+
+.header-icon{
+  width:40px;
+  height:40px;
+}
 
       .talk-btn.talking{
         background:#16a34a;

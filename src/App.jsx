@@ -326,7 +326,12 @@ function App() {
       <div className="main-card">
 
         <h1 className="title">
-          🚑 CERMedi-ALERT
+          <img
+            src="/logo.jpg"
+            alt="Ambulance"
+            className="ambulance-icon"
+          />
+          CERMedi-ALERT
         </h1>
 
         {/*  ALERT */}
@@ -706,6 +711,23 @@ function App() {
 
           background: #1d4ed8;
         }
+
+          .title {
+  text-align: center;
+  font-size: 34px;
+  color: #2563eb;
+  margin-bottom: 25px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.ambulance-icon {
+  width: 40px;
+  height: 40px;
+}
 
 
         /* HISTORY */
