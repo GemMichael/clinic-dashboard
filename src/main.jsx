@@ -12,6 +12,7 @@ import {
 
 import App from "./App.jsx";
 import Room2 from "./Room2.jsx";
+import Room3 from "./Room3.jsx";
 
 ReactDOM.createRoot(
   document.getElementById("root")
@@ -30,6 +31,11 @@ ReactDOM.createRoot(
           element={<Room2 />}
         />
 
+
+        <Route
+          path="/room3"
+          element={<Room3 />}
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
