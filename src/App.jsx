@@ -302,7 +302,7 @@ function App() {
       alarmRef.current.currentTime = 0;
     }
     // only refresh if room2 is already cleared
-    if (!room2Alert) {
+    if (!room2Alert && !room3Alert) {
 
       setTimeout(() => {
         window.location.reload();
@@ -324,7 +324,7 @@ function App() {
       alarmRef.current.currentTime = 0;
     }
     // only refresh if room1 is already cleared
-    if (!alert) {
+    if (!alert && !room3Alert) {
 
       setTimeout(() => {
         window.location.reload();
@@ -397,7 +397,7 @@ function App() {
         </h1>
 
         {/*  ALERT */}
-        {(alert || room2Alert) && (
+        {(alert || room2Alert ||room3Alert) && (
 
           <div className="alert-box">
 
