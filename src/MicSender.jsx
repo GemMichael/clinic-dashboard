@@ -21,11 +21,21 @@ function MicSender({
     // =========================
     // WEBSOCKET
     // =========================
-    const wsUrl =
-      activeRoom === "room2"
+    let wsUrl;
 
-        ? "wss://clinic-dashboard-4.onrender.com"
-        : "wss://clinic-dashboard-1-xlgb.onrender.com";
+    if (activeRoom === "room1") {
+
+      wsUrl = "wss://clinic-dashboard-1-xlgb.onrender.com";
+
+    } else if (activeRoom === "room2") {
+
+      wsUrl = "wss://clinic-dashboard-4.onrender.com";
+
+    } else if (activeRoom === "room3") {
+
+      wsUrl = "wss://clinic-dashboard-7.onrender.com";
+
+    }
     console.log(
       "MIC CONNECTING TO:",
       wsUrl

@@ -14,7 +14,7 @@ function Room3MicSender({ talking }) {
     // WEBSOCKET
     // =========================
     socketRef.current = new WebSocket(
-      "wss://clinic-dashboard-4.onrender.com"
+      "wss://clinic-dashboard-7.onrender.com"
     );
 
     socketRef.current.binaryType = "arraybuffer";
@@ -22,7 +22,7 @@ function Room3MicSender({ talking }) {
 
     socketRef.current.onopen = async () => {
 
-      socketRef.current.send(
+      socketRef.current.send( 
         JSON.stringify({
           type: "register",
           role: "room3Sender"

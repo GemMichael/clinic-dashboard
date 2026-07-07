@@ -56,7 +56,7 @@ function Room3AudioReceiver() {
     function connectSocket() {
       console.log("🔄 Connecting...");
 
-      socket = new WebSocket("wss://clinic-dashboard-4.onrender.com");
+      socket = new WebSocket("wss://clinic-dashboard-7.onrender.com");
       socket.binaryType = "arraybuffer";
 
       socket.onopen = () => {

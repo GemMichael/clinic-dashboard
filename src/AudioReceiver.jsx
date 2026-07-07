@@ -59,10 +59,21 @@ function AudioReceiver({
     function connectSocket() {
       console.log("🔄 Connecting...");
 
-      const wsUrl =
-        activeRoom === "room2"
-          ? "wss://clinic-dashboard-4.onrender.com"
-          : "wss://clinic-dashboard-1-xlgb.onrender.com";
+      let wsUrl;
+
+      if (activeRoom === "room1") {
+
+        wsUrl = "wss://clinic-dashboard-1-xlgb.onrender.com";
+
+      } else if (activeRoom === "room2") {
+
+        wsUrl = "wss://clinic-dashboard-4.onrender.com";
+
+      } else if (activeRoom === "room3") {
+
+        wsUrl = "wss://clinic-dashboard-7.onrender.com";
+
+      }
 
       console.log(
         "RECEIVER CONNECTING TO:",

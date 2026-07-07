@@ -35,6 +35,9 @@ function App() {
   const [room2Alert, setRoom2Alert] =
     useState(false);
 
+  const [room3Alert, setRoom3Alert] =
+    useState(false);
+
   const [activeRoom, setActiveRoom] =
     useState("room1");
 
@@ -137,6 +140,40 @@ function App() {
           alarmRef.current.currentTime = 0;
         }
       }
+    });
+
+    // ROOM 3 PANIC
+    const panic3Ref =
+      ref(db, "panic3");
+
+    onValue(panic3Ref, (snapshot) => {
+
+      const value = snapshot.val();
+
+      if (value === true) {
+
+        setRoom3Alert(true);
+
+        if (alarmRef.current) {
+
+          alarmRef.current.loop = true;
+
+          alarmRef.current.play()
+            .catch(() => { });
+        }
+
+      } else {
+
+        setRoom3Alert(false);
+
+        if (!alert && !room2Alert) {
+
+          alarmRef.current.pause();
+          alarmRef.current.currentTime = 0;
+        }
+
+      }
+
     });
 
     //  FINGERPRINT STATUS
@@ -295,10 +332,35 @@ function App() {
 
     }
   };
+
+  const handleRoom3 = () => {
+
+    set(ref(db, "panic3"), false);
+
+    set(ref(db, "activeRoom"), "room3");
+
+    if (alarmRef.current) {
+
+      alarmRef.current.pause();
+
+      alarmRef.current.currentTime = 0;
+    }
+
+    if (!alert && !room2Alert) {
+
+      setTimeout(() => {
+
+        window.location.reload();
+
+      }, 500);
+
+    }
+
+  };
   return (
 
     <div
-      className={`app-container ${(alert || room2Alert)
+      className={`app-container ${(alert || room2Alert || room3Alert)
         ? "alert-mode"
         : ""
         }`}
@@ -352,6 +414,9 @@ function App() {
               {room2Alert && (
                 <div>🏥 ROOM 2</div>
               )}
+              {room3Alert && (
+                <div>🏥 ROOM 3</div>
+              )}
 
             </div>
 
@@ -373,6 +438,16 @@ function App() {
                 onClick={handleRoom2}
               >
                 Resolve Room 2
+              </button>
+
+            )}
+            {room3Alert && (
+
+              <button
+                className="btn-ok"
+                onClick={handleRoom3}
+              >
+                Resolve Room 3
               </button>
 
             )}
