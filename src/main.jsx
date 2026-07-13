@@ -13,6 +13,7 @@ import {
 import App from "./App.jsx";
 import Room2 from "./Room2.jsx";
 import Room3 from "./Room3.jsx";
+import ManualUser from "./ManualUser.jsx";
 
 ReactDOM.createRoot(
   document.getElementById("root")
@@ -35,6 +36,11 @@ ReactDOM.createRoot(
         <Route
           path="/room3"
           element={<Room3 />}
+        />
+
+          <Route
+          path="/manual-user"
+          element={<ManualUser />}
         />
       </Routes>
     </BrowserRouter>
